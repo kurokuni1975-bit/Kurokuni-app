@@ -1,0 +1,139 @@
+{
+  "started_at": "2026-10-04T14:17:18.100261+00:00",
+  "ended_at": "2026-10-04T14:17:20.101164+00:00",
+  "input": "listing/examples/items.example.json",
+  "dry_run": true,
+  "total": 2,
+  "succeeded": 2,
+  "failed": 0,
+  "results": [
+    {
+      "dry_run": true,
+      "sku": "MV73-0001",
+      "title": "VINTAGE 92' NIRVANA KURT COBAIN SMILEY LOGO ROCK TOUR T-SHIRT SZ LARGE",
+      "marketplace_id": "EBAY_US",
+      "warnings": [],
+      "payloads": {
+        "inventory_item": {
+          "sku": "MV73-0001",
+          "locale": "en-US",
+          "condition": "USED_GOOD",
+          "product": {
+            "title": "VINTAGE 92' NIRVANA KURT COBAIN SMILEY LOGO ROCK TOUR T-SHIRT SZ LARGE",
+            "description": "<p><b>Seller's measurements:</b> 21 inches pit to pit, 28 inches top to bottom (back).</p>\n<p><b>Condition:</b> Pre-owned - Good</p>\n<p><b>Condition note:</b> FADED, FEW TINY STAINS</p>",
+            "imageUrls": [
+              "https://example.com/photos/MV73-0001-front.jpg",
+              "https://example.com/photos/MV73-0001-back.jpg",
+              "https://example.com/photos/MV73-0001-tag.jpg"
+            ],
+            "aspects": {
+              "Color": [
+                "Black"
+              ],
+              "Gender": [
+                "Men"
+              ],
+              "Material": [
+                "Cotton"
+              ],
+              "Size": [
+                "L"
+              ],
+              "Type": [
+                "T-shirt"
+              ]
+            }
+          },
+          "availability": {
+            "shipToLocationAvailability": {
+              "quantity": 1
+            }
+          },
+          "conditionDescription": "FADED, FEW TINY STAINS",
+          "customLabel": "BOX-07"
+        },
+        "offer": {
+          "sku": "MV73-0001",
+          "marketplaceId": "EBAY_US",
+          "format": "FIXED_PRICE",
+          "availableQuantity": 1,
+          "categoryId": "15687",
+          "listingDuration": "GTC",
+          "merchantLocationKey": "KUROKUNI-WAREHOUSE",
+          "pricingSummary": {
+            "price": {
+              "value": "145.00",
+              "currency": "USD"
+            }
+          },
+          "listingPolicies": {
+            "paymentPolicyId": "241394720018",
+            "returnPolicyId": "158959915018",
+            "fulfillmentPolicyId": "61841079018",
+            "bestOfferTerms": {
+              "bestOfferEnabled": true,
+              "autoDeclinePrice": {
+                "value": "110.00",
+                "currency": "USD"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "dry_run": true,
+      "sku": "MV73-0002",
+      "title": "VINTAGE 50' BIG SMITH BUCKAROO SANFORIZED DENIM JACKET SZ 40",
+      "marketplace_id": "EBAY_US",
+      "warnings": [],
+      "payloads": {
+        "inventory_item": {
+          "sku": "MV73-0002",
+          "locale": "en-US",
+          "condition": "USED_GOOD",
+          "product": {
+            "title": "VINTAGE 50' BIG SMITH BUCKAROO SANFORIZED DENIM JACKET SZ 40",
+            "description": "<p><b>Seller's measurements:</b> 22 inches pit to pit, 26 inches top to bottom (back), 18 inches shoulder, 24 inches sleeve.</p>\n<p><b>Condition:</b> Pre-owned - Good</p>\n<p><b>Condition note:</b> 1 REPAIR, MINOR RIPS</p>",
+            "imageUrls": [
+              "https://example.com/photos/MV73-0002-front.jpg",
+              "https://example.com/photos/MV73-0002-back.jpg"
+            ],
+            "aspects": {}
+          },
+          "availability": {
+            "shipToLocationAvailability": {
+              "quantity": 1
+            }
+          },
+          "conditionDescription": "1 REPAIR, MINOR RIPS",
+          "customLabel": "BOX-03"
+        },
+        "offer": {
+          "sku": "MV73-0002",
+          "marketplaceId": "EBAY_US",
+          "format": "FIXED_PRICE",
+          "availableQuantity": 1,
+          "categoryId": "57988",
+          "listingDuration": "GTC",
+          "merchantLocationKey": "KUROKUNI-WAREHOUSE",
+          "pricingSummary": {
+            "price": {
+              "value": "295.00",
+              "currency": "USD"
+            }
+          },
+          "listingPolicies": {
+            "paymentPolicyId": "241394720018",
+            "returnPolicyId": "158959915018",
+            "fulfillmentPolicyId": "61841079018",
+            "bestOfferTerms": {
+              "bestOfferEnabled": true
+            }
+          }
+        }
+      }
+    }
+  ],
+  "failures": []
+}

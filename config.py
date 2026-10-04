@@ -10,8 +10,9 @@ import os
 from pathlib import Path
 
 APP_ROOT = Path(__file__).resolve().parent
+# Render 등 외부 배포에서는 vendor/ebay-api 사용, 로컬에서는 env 오버라이드 가능
 EBAY_API_DIR = Path(os.environ.get("EBAY_API_DIR",
-                                   str(Path.home() / "workspace" / "ebay-api")))
+                                   str(APP_ROOT / "vendor" / "ebay-api")))
 
 UPLOAD_DIR = APP_ROOT / "uploads"
 DRAFT_DIR = APP_ROOT / "drafts"
