@@ -5,3 +5,5 @@ drafts/
 items/
 *.log
 logs/
+watcher_seen.json
+*.log
