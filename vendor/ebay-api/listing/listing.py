@@ -138,9 +138,14 @@ def _api(method: str, path: str, token: str, payload: dict | None = None,
 # --------------------------------------------------------------------------
 
 #: Inventory API ConditionEnum values valid for clothing on EBAY_US
+#: Note (2026-10-04): Apparel categories do NOT support USED_GOOD (5000),
+#: USED_VERY_GOOD (4000), USED_ACCEPTABLE (6000). They use apparel-specific:
+#: PRE_OWNED_EXCELLENT (2990), USED_EXCELLENT (3000, displays as "Pre-owned - Good"),
+#: PRE_OWNED_FAIR (3010). See https://developer.ebay.com/api-docs/sell/static/metadata/condition-id-values.html
 VALID_CONDITIONS = {
     "NEW", "NEW_WITH_TAGS", "LIKE_NEW", "NEW_OTHER", "NEW_WITH_DEFECTS",
     "USED_EXCELLENT", "USED_VERY_GOOD", "USED_GOOD", "USED_ACCEPTABLE",
+    "PRE_OWNED_EXCELLENT", "PRE_OWNED_FAIR",
 }
 
 #: friendly / style-guide names -> ConditionEnum
@@ -155,17 +160,17 @@ CONDITION_ALIASES = {
     "new_other": "NEW_OTHER",
     "new with defects": "NEW_WITH_DEFECTS",
     "new_with_defects": "NEW_WITH_DEFECTS",
-    "pre-owned - excellent": "USED_EXCELLENT",
-    "preowned excellent": "USED_EXCELLENT",
-    "pre-owned - good": "USED_GOOD",
-    "preowned good": "USED_GOOD",
-    "pre-owned - fair": "USED_ACCEPTABLE",
-    "preowned fair": "USED_ACCEPTABLE",
-    "used": "USED_GOOD",
+    "pre-owned - excellent": "PRE_OWNED_EXCELLENT",
+    "preowned excellent": "PRE_OWNED_EXCELLENT",
+    "pre-owned - good": "USED_EXCELLENT",
+    "preowned good": "USED_EXCELLENT",
+    "pre-owned - fair": "PRE_OWNED_FAIR",
+    "preowned fair": "PRE_OWNED_FAIR",
+    "used": "USED_EXCELLENT",
     "used excellent": "USED_EXCELLENT",
     "used very good": "USED_VERY_GOOD",
-    "used good": "USED_GOOD",
-    "used acceptable": "USED_ACCEPTABLE",
+    "used good": "USED_EXCELLENT",
+    "used acceptable": "PRE_OWNED_FAIR",
 }
 
 #: ConditionEnum -> display text used in the description
@@ -175,10 +180,12 @@ CONDITION_DISPLAY = {
     "LIKE_NEW": "Like new",
     "NEW_OTHER": "New other",
     "NEW_WITH_DEFECTS": "New with defects",
-    "USED_EXCELLENT": "Pre-owned - Excellent",
+    "USED_EXCELLENT": "Pre-owned - Good",
     "USED_VERY_GOOD": "Pre-owned - Very Good",
     "USED_GOOD": "Pre-owned - Good",
     "USED_ACCEPTABLE": "Pre-owned - Acceptable",
+    "PRE_OWNED_EXCELLENT": "Pre-owned - Excellent",
+    "PRE_OWNED_FAIR": "Pre-owned - Fair",
 }
 
 
