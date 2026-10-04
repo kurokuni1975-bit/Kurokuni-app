@@ -146,10 +146,42 @@ def build_listing_input(item: dict, draft: dict,
 
     # 필수 item specifics 기본값 (eBay가 요구하는 항목)
     aspects = dict(draft.get("aspects") or {})
-    # T-Shirts 카테고리 필수: Size Type, Department
+    # T-Shirts 카테고리 필수 항목들
     if (draft.get("category") or "tshirt") == "tshirt":
         aspects.setdefault("Size Type", "Regular")
         aspects.setdefault("Department", "Men")
+        # Color, Size, Brand는 초안에서 추출 시도, 없으면 기본값
+        if "Color" not in aspects:
+            # 설명에서 색상 추출 시도
+            desc = (draft.get("description") or "").lower()
+            for color in ["black", "white", "blue", "red", "green", "gray", "grey"]:
+                if color in desc:
+                    aspects["Color"] = color.capitalize()
+                    break
+            else:
+                aspects["Color"] = "Black"
+        if "Size" not in aspects:
+            # 제목에서 사이즈 추출 시도
+            title = (draft.get("title") or "").upper()
+            for sz in ["XXL", "XL", "LARGE", "MEDIUM", "SMALL", "XXL", "3XL"]:
+                if sz in title:
+                    aspects["Size"] = {"LARGE": "L", "MEDIUM": "M", "SMALL": "S"}.get(sz, sz)
+                    break
+            else:
+                aspects["Size"] = "L"
+        # Brand: 초안의 brand 필드 또는 설명에서 추출, 없으면 Unbranded
+        if "Brand" not in aspects:
+            brand = (draft.get("brand") or "").strip()
+            if not brand:
+                # 흔한 택 브랜드를 설명에서 찾기
+                desc_up = (draft.get("description") or "").upper()
+                for b in ["DELTA", "GILDAN", "HANES", "FRUIT OF THE LOOM", "ANVIL",
+                          "ALSTYLE", "BELLA", "NEXT LEVEL", "COMFORT COLORS",
+                          "CHAMPION", "NIKE", "ADIDAS", "REEBOK"]:
+                    if b in desc_up:
+                        brand = b.title() if b != "FRUIT OF THE LOOM" else "Fruit of the Loom"
+                        break
+            aspects["Brand"] = brand or "Unbranded"
 
     return {
         "sku": item["sku"],
