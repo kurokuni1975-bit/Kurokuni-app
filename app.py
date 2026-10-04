@@ -118,42 +118,64 @@ def upload_form():
 
 @app.post("/upload")
 def upload():
-    files = request.files.getlist("photos")
-    files = [f for f in files if f and f.filename]
-    if not files:
+    # 배치 모드: photos_0, photos_1, ... + note_0, note_1, ... + group_count
+    # 단일 모드 (하위 호환): photos + note
+    groups = []
+    try:
+        group_count = int(request.form.get("group_count", "0"))
+    except ValueError:
+        group_count = 0
+    if group_count > 0:
+        for gi in range(group_count):
+            files = [f for f in request.files.getlist(f"photos_{gi}") if f and f.filename]
+            if files:
+                groups.append({
+                    "files": files,
+                    "note": (request.form.get(f"note_{gi}") or "").strip()[:500],
+                })
+    else:
+        files = [f for f in request.files.getlist("photos") if f and f.filename]
+        if files:
+            groups.append({
+                "files": files,
+                "note": (request.form.get("note") or "").strip()[:500],
+            })
+
+    if not groups:
         return render_template("upload.html", error="사진을 1장 이상 선택하세요.",
                                max_mb=config.MAX_UPLOAD_MB,
                                max_photos=config.MAX_PHOTOS), 400
-    if len(files) > config.MAX_PHOTOS:
-        return render_template("upload.html",
-                               error=f"사진은 최대 {config.MAX_PHOTOS}장까지.",
-                               max_mb=config.MAX_UPLOAD_MB,
-                               max_photos=config.MAX_PHOTOS), 400
 
-    item_id = store.new_item_id()
-    saved = []
+    created = []
     try:
-        for i, f in enumerate(files):
-            ext = Path(f.filename).suffix.lower()
-            if ext not in ALLOWED_EXT:
-                # 확장자 없어도 JPEG로 저장 시도 (모바일 HEIC 등)
-                ext = ".jpg"
-            fname = f"{i + 1:02d}{ext if ext != '.heic' and ext != '.heif' else '.jpg'}"
-            fname = secure_filename(fname)
-            data = f.read()
-            if len(data) > config.MAX_UPLOAD_MB * 1024 * 1024:
-                raise ValueError(f"{f.filename}: {config.MAX_UPLOAD_MB}MB 초과")
-            _resize_and_save(data, config.UPLOAD_DIR / item_id / fname)
-            saved.append(fname)
+        for g in groups:
+            files = g["files"]
+            if len(files) > config.MAX_PHOTOS:
+                raise ValueError(f"아이템당 사진은 최대 {config.MAX_PHOTOS}장까지.")
+            item_id = store.new_item_id()
+            saved = []
+            for i, f in enumerate(files):
+                ext = Path(f.filename).suffix.lower()
+                if ext not in ALLOWED_EXT:
+                    ext = ".jpg"
+                fname = f"{i + 1:02d}{ext if ext != '.heic' and ext != '.heif' else '.jpg'}"
+                fname = secure_filename(fname)
+                data = f.read()
+                if len(data) > config.MAX_UPLOAD_MB * 1024 * 1024:
+                    raise ValueError(f"{f.filename}: {config.MAX_UPLOAD_MB}MB 초과")
+                _resize_and_save(data, config.UPLOAD_DIR / item_id / fname)
+                saved.append(fname)
+            item = store.create_item(saved, note=g["note"], item_id=item_id)
+            log.info("업로드 완료: %s (%d장)", item["item_id"], len(saved))
+            created.append(item["item_id"])
     except Exception as exc:  # noqa: BLE001
         return render_template("upload.html", error=f"업로드 실패: {exc}",
                                max_mb=config.MAX_UPLOAD_MB,
                                max_photos=config.MAX_PHOTOS), 400
 
-    note = (request.form.get("note") or "").strip()[:500]
-    item = store.create_item(saved, note=note, item_id=item_id)
-    log.info("업로드 완료: %s (%d장)", item["item_id"], len(saved))
-    return redirect(url_for("item_detail", item_id=item["item_id"]))
+    if len(created) == 1:
+        return redirect(url_for("item_detail", item_id=created[0]))
+    return redirect(url_for("index"))
 
 
 @app.get("/item/<item_id>")

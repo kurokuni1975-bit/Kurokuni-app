@@ -4,28 +4,39 @@
 <h2>새 상품 사진 올리기</h2>
 {% if error %}<div class="err">{{ error }}</div>{% endif %}
 <form method="post" enctype="multipart/form-data" id="uploadForm">
-  <div class="card">
-    <label class="f" for="photos">사진 선택 (앞/뒤/브랜드택/사이즈택/소재택/줄자/하자)</label>
-    <input type="file" id="photos" name="photos" accept="image/*" multiple
-           style="font-size:16px; padding:8px 0">
-    <div class="hint">최대 {{ max_photos }}장. 폰에서 자동으로 줄여서 올립니다.</div>
-    <div id="progress" class="hint" style="display:none; color:#1a73e8; font-weight:bold;"></div>
-  </div>
-  <div class="card">
-    <label class="f" for="note">메모 (선택)</label>
-    <input type="text" id="note" name="note" placeholder="예: 박스 A-3, 내일 촬영분">
-  </div>
+  <div id="groups"></div>
+  <button type="button" class="btn block" id="addItemBtn" style="margin-bottom:12px;">＋ 아이템 추가</button>
+  <div id="progress" class="hint" style="display:none; color:#1a73e8; font-weight:bold;"></div>
   <button class="btn primary block" type="submit" id="submitBtn">업로드</button>
 </form>
-<div class="hint">업로드 후 상태는 "분석 대기"가 됩니다. 철수가 초안을 작성하면 "초안 검토"에서 확인하세요.</div>
+<div class="hint">업로드 후 상태는 "분석 대기"가 됩니다. 철수가 초안을 자동으로 작성하면 "초안 검토"에서 확인하세요.</div>
 
 <script>
 (function() {
+  var groupsDiv = document.getElementById('groups');
   var form = document.getElementById('uploadForm');
-  var input = document.getElementById('photos');
   var btn = document.getElementById('submitBtn');
   var progress = document.getElementById('progress');
   var MAX_SIDE = 1600;
+  var groupCount = 0;
+
+  function addGroup() {
+    var idx = groupCount++;
+    var div = document.createElement('div');
+    div.className = 'card';
+    div.innerHTML =
+      '<div style="display:flex; justify-content:space-between; align-items:center;">' +
+      '<label class="f" style="margin:0;">아이템 ' + (idx + 1) + ' 사진</label>' +
+      (idx > 0 ? '<button type="button" class="btn small" onclick="this.closest(\'.card\').remove()">삭제</button>' : '') +
+      '</div>' +
+      '<input type="file" data-group="' + idx + '" accept="image/*" multiple style="font-size:16px; padding:8px 0">' +
+      '<div class="hint">앞/뒤/브랜드택/사이즈택/소재택/줄자/하자</div>' +
+      '<input type="text" data-note="' + idx + '" placeholder="메모 (선택)" style="margin-top:8px; width:100%; padding:8px; font-size:16px;">';
+    groupsDiv.appendChild(div);
+  }
+
+  document.getElementById('addItemBtn').addEventListener('click', addGroup);
+  addGroup(); // 첫 그룹
 
   function resizeFile(file) {
     return new Promise(function(resolve, reject) {
@@ -50,32 +61,51 @@
   }
 
   form.addEventListener('submit', function(e) {
-    var files = input.files;
-    if (!files || files.length === 0) return; // 서버에서 에러 표시
     e.preventDefault();
+    var inputs = groupsDiv.querySelectorAll('input[type="file"]');
+    var groups = [];
+    inputs.forEach(function(inp) {
+      var files = Array.from(inp.files).filter(function(f) { return f && f.name; });
+      if (files.length > 0) {
+        var noteEl = groupsDiv.querySelector('input[data-note="' + inp.dataset.group + '"]');
+        groups.push({files: files, note: noteEl ? noteEl.value : ''});
+      }
+    });
+    if (groups.length === 0) {
+      alert('사진을 1장 이상 선택하세요.');
+      return;
+    }
     btn.disabled = true;
     btn.textContent = '준비 중...';
     progress.style.display = 'block';
 
-    var done = 0, resized = [];
-    var total = files.length;
+    var total = groups.reduce(function(n, g) { return n + g.files.length; }, 0);
+    var done = 0;
+    var fd = new FormData();
+    fd.append('group_count', groups.length);
 
-    function next(i) {
-      if (i >= total) { sendAll(); return; }
-      progress.textContent = '사진 줄이는 중... (' + (i + 1) + '/' + total + ')';
-      resizeFile(files[i]).then(function(f) {
-        resized.push(f); next(i + 1);
-      }).catch(function() {
-        resized.push(files[i]); next(i + 1); // 실패하면 원본
-      });
+    function processGroup(gi) {
+      if (gi >= groups.length) { sendAll(); return; }
+      var g = groups[gi];
+      fd.append('note_' + gi, g.note);
+      function processFile(fi) {
+        if (fi >= g.files.length) { processGroup(gi + 1); return; }
+        done++;
+        progress.textContent = '사진 줄이는 중... (' + done + '/' + total + ')';
+        resizeFile(g.files[fi]).then(function(f) {
+          fd.append('photos_' + gi, f, f.name);
+          processFile(fi + 1);
+        }).catch(function() {
+          fd.append('photos_' + gi, g.files[fi], g.files[fi].name);
+          processFile(fi + 1);
+        });
+      }
+      processFile(0);
     }
 
     function sendAll() {
       progress.textContent = '업로드 중... 잠시만요.';
       btn.textContent = '업로드 중...';
-      var fd = new FormData();
-      resized.forEach(function(f) { fd.append('photos', f, f.name); });
-      fd.append('note', document.getElementById('note').value);
       fetch(form.action || window.location.href, {method: 'POST', body: fd})
         .then(function(r) {
           if (r.redirected) { window.location.href = r.url; return; }
@@ -87,7 +117,7 @@
           btn.textContent = '업로드';
         });
     }
-    next(0);
+    processGroup(0);
   });
 })();
 </script>
