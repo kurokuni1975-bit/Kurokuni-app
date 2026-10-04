@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}초안 검토 {{ item.item_id }}{% endblock %}
+{% block body %}
+<h2>초안 검토 <span class="meta">{{ item.item_id }}</span></h2>
+{% if not has_draft %}
+<div class="hint">아직 AI 초안이 없습니다. 직접 입력해서 저장하면 바로 발행할 수 있습니다.</div>
+{% endif %}
+<div class="card">
+  <div class="grid-photos">
+    {% for p in photos %}<img src="{{ p }}" loading="lazy">{% endfor %}
+  </div>
+</div>
+<form method="post">
+  <div class="card">
+    <label class="f" for="title">제목</label>
+    <input type="text" id="title" name="title" value="{{ form.title }}" maxlength="80">
+    <div class="hint">80자 이내, VINTAGE로 시작, 대문자</div>
+
+    <label class="f" for="description">설명</label>
+    <textarea id="description" name="description">{{ form.description }}</textarea>
+
+    <div class="row2">
+      <div>
+        <label class="f" for="price_usd">가격 (USD)</label>
+        <input type="number" id="price_usd" name="price_usd" step="0.01" min="0" value="{{ form.price_usd }}">
+      </div>
+      <div>
+        <label class="f" for="min_offer_price">최저 오퍼 (USD)</label>
+        <input type="number" id="min_offer_price" name="min_offer_price" step="0.01" min="0" value="{{ form.min_offer_price }}">
+      </div>
+    </div>
+
+    <div class="row2">
+      <div>
+        <label class="f" for="category">카테고리</label>
+        <select id="category" name="category">
+          {% for c in ['tshirt','hoodie','jacket','jersey','bag','hat','shirt','polo','pants'] %}
+          <option value="{{ c }}" {% if form.category==c %}selected{% endif %}>{{ c }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="f" for="condition">상태</label>
+        <select id="condition" name="condition">
+          {% for c in ['NEW','NEW_WITH_TAGS','LIKE_NEW','NEW_OTHER','USED_EXCELLENT','USED_VERY_GOOD','USED_GOOD','USED_ACCEPTABLE'] %}
+          <option value="{{ c }}" {% if form.condition==c %}selected{% endif %}>{{ c }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="row2">
+      <div>
+        <label class="f" for="pit_to_pit">품 (인치)</label>
+        <input type="text" id="pit_to_pit" name="pit_to_pit" value="{{ form.pit_to_pit }}">
+      </div>
+      <div>
+        <label class="f" for="length">기장 (인치)</label>
+        <input type="text" id="length" name="length" value="{{ form.length }}">
+      </div>
+    </div>
+
+    <label class="f" for="defects">하자</label>
+    <input type="text" id="defects" name="defects" value="{{ form.defects }}">
+
+    <label class="f" for="box_number">박스 번호</label>
+    <input type="text" id="box_number" name="box_number" value="{{ form.box_number }}">
+
+    <label class="check"><input type="checkbox" name="suggested_best_offer"
+      {% if form.suggested_best_offer %}checked{% endif %}> Best Offer 받기</label>
+  </div>
+  <button class="btn primary block" type="submit">초안 저장</button>
+</form>
+{% endblock %}

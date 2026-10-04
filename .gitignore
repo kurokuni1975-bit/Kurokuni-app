@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+uploads/
+drafts/
+items/
+*.log
+logs/

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>{% block title %}KUROKUNI 리스팅{% endblock %}</title>
+<style>
+:root { --bg:#f6f6f4; --card:#fff; --ink:#1a1a1a; --mut:#777; --line:#e5e5e0;
+        --acc:#0a7d2c; --warn:#b25e09; --bad:#b3261e; --chip:#eef2ee; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink);
+       font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+       font-size:16px; line-height:1.5; }
+.wrap { max-width:640px; margin:0 auto; padding:12px 12px 48px; }
+header.top { position:sticky; top:0; background:var(--bg); padding:10px 12px;
+             border-bottom:1px solid var(--line); z-index:10; }
+header.top .row { max-width:640px; margin:0 auto; display:flex; gap:8px; align-items:center; }
+header.top a.brand { font-weight:800; font-size:18px; color:var(--ink); text-decoration:none; }
+header.top nav { margin-left:auto; display:flex; gap:8px; }
+.btn { display:inline-block; padding:12px 18px; border-radius:10px; border:1px solid var(--line);
+       background:var(--card); color:var(--ink); text-decoration:none; font-size:16px;
+       cursor:pointer; text-align:center; }
+.btn.primary { background:var(--ink); color:#fff; border-color:var(--ink); font-weight:700; }
+.btn.go { background:var(--acc); border-color:var(--acc); color:#fff; font-weight:700; }
+.btn.danger { background:var(--bad); border-color:var(--bad); color:#fff; }
+.btn.block { display:block; width:100%; margin-top:10px; }
+.btn:disabled { opacity:.45; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:12px;
+        padding:14px; margin:10px 0; }
+.badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:13px;
+         background:var(--chip); }
+.badge.pending { background:#fff3d6; color:#8a5a00; }
+.badge.draft_ready { background:#dceaff; color:#0b4da2; }
+.badge.publishing { background:#e8e0ff; color:#5b21b6; }
+.badge.published { background:#d9f2e2; color:#0a7d2c; }
+.badge.failed { background:#fbdfe0; color:#b3261e; }
+.meta { color:var(--mut); font-size:13px; }
+.grid-photos { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
+.grid-photos img { width:100%; aspect-ratio:1; object-fit:cover; border-radius:8px;
+                   border:1px solid var(--line); }
+label.f { display:block; margin:12px 0 4px; font-weight:700; font-size:14px; }
+input[type=text],input[type=number],textarea,select {
+  width:100%; padding:12px; font-size:16px; border:1px solid var(--line);
+  border-radius:10px; background:#fff; }
+textarea { min-height:120px; }
+.row2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.err { background:#fbdfe0; color:var(--bad); border-radius:10px; padding:12px; margin:10px 0; }
+.okmsg { background:#d9f2e2; color:#0a7d2c; border-radius:10px; padding:12px; margin:10px 0; }
+.hint { color:var(--mut); font-size:13px; margin-top:4px; }
+.check { display:flex; gap:8px; align-items:center; margin:12px 0; }
+.check input { width:22px; height:22px; }
+.list-item { display:flex; gap:10px; align-items:center; padding:10px 0;
+             border-bottom:1px solid var(--line); }
+.list-item:last-child { border-bottom:none; }
+.thumb { width:64px; height:64px; object-fit:cover; border-radius:8px;
+         border:1px solid var(--line); flex:none; background:#eee; }
+.stat { display:flex; gap:8px; flex-wrap:wrap; margin:8px 0; }
+.stat .pill { background:var(--card); border:1px solid var(--line); border-radius:20px;
+              padding:6px 12px; font-size:14px; }
+pre.dump { background:#111; color:#d7ffd7; padding:10px; border-radius:8px;
+           font-size:12px; overflow:auto; }
+</style>
+</head>
+<body>
+<header class="top"><div class="row">
+  <a class="brand" href="/">KUROKUNI</a>
+  <nav>
+    <a class="btn" href="/upload">+ 새 상품</a>
+  </nav>
+</div></header>
+<div class="wrap">
+{% block body %}{% endblock %}
+</div>
+</body>
+</html>

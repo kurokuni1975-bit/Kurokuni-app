@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}상품 {{ item.item_id }}{% endblock %}
+{% block body %}
+<h2>{{ item.item_id }} <span class="badge {{ item.status }}">{{ labels.get(item.status, item.status) }}</span></h2>
+{% if item.note %}<div class="meta">{{ item.note }}</div>{% endif %}
+
+<div class="card">
+  <div class="grid-photos">
+    {% for p in photos %}<img src="{{ p }}" loading="lazy">{% endfor %}
+  </div>
+</div>
+
+{% if draft %}
+<div class="card">
+  <label class="f">초안 제목</label>
+  <div>{{ draft.title }}</div>
+  <label class="f">가격</label>
+  <div>${{ draft.price_usd }} USD {% if draft.suggested_best_offer %}(Best Offer 제안){% endif %}</div>
+  <label class="f">설명</label>
+  <div style="white-space:pre-wrap; font-size:14px">{{ draft.description }}</div>
+  <div class="row2" style="margin-top:8px">
+    <div><span class="meta">카테고리</span><br>{{ draft.category }}</div>
+    <div><span class="meta">상태</span><br>{{ draft.condition }}</div>
+  </div>
+</div>
+{% else %}
+<div class="card"><div class="meta">초안이 아직 없습니다. 철수가 사진을 분석하면 여기에 표시됩니다.</div></div>
+{% endif %}
+
+{% if img_err %}
+<div class="err">{{ img_err }}</div>
+{% endif %}
+
+{% if item.status == 'published' %}
+<div class="okmsg">✅ 발행됨 — eBay 리스팅 ID: {{ item.listing_id }}</div>
+{% endif %}
+{% if item.error %}
+<div class="err">{{ item.error }}</div>
+{% endif %}
+
+<div class="card">
+  <label class="f">Depop</label>
+  {% if item.depop_status == 'posted' %}
+    <div class="okmsg">✅ Depop 등록됨
+      {% if item.depop_url %}<br><a href="{{ item.depop_url }}">{{ item.depop_url }}</a>{% endif %}</div>
+  {% elif item.depop_status == 'queued' %}
+    <div><span class="badge">Depop 대기 중</span> <span class="meta">C${{ item.depop_price_cad }}</span></div>
+  {% elif item.depop_status == 'posting' %}
+    <div><span class="badge">Depop 등록 중…</span></div>
+  {% elif item.depop_status == 'failed' %}
+    <div class="err">Depop 실패: {{ item.depop_error }}</div>
+  {% else %}
+    <div class="meta">아직 Depop에 올리지 않았습니다.</div>
+  {% endif %}
+  {% if item.depop_error and item.depop_status not in ('posted',) %}<div class="err">{{ item.depop_error }}</div>{% endif %}
+  {% if item.status == 'published' and item.depop_status not in ('queued','posting','posted') %}
+  <form method="post" action="/depop/queue/{{ item.item_id }}">
+    <button class="btn block" type="submit">Depop에도 올리기</button>
+  </form>
+  {% elif item.status != 'published' %}
+  <div class="hint">eBay 발행 후 Depop에 올릴 수 있습니다.</div>
+  {% endif %}
+</div>
+
+<a class="btn block" href="/review/{{ item.item_id }}">초안 검토/수정</a>
+{% if item.status in ('draft_ready','failed','pending') %}
+<form method="post" action="/publish/{{ item.item_id }}"
+      onsubmit="return confirm('eBay에 발행합니다. 계속할까요?')">
+  <button class="btn go block" type="submit" {% if img_err or not draft %}disabled{% endif %}>eBay에 발행</button>
+</form>
+{% endif %}
+{% if img_err or not draft %}
+<div class="hint">발행하려면 초안과 이미지 공개 URL이 필요합니다.</div>
+{% endif %}
+{% endblock %}

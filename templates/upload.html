@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}새 상품 업로드{% endblock %}
+{% block body %}
+<h2>새 상품 사진 올리기</h2>
+{% if error %}<div class="err">{{ error }}</div>{% endif %}
+<form method="post" enctype="multipart/form-data">
+  <div class="card">
+    <label class="f" for="photos">사진 선택 (앞/뒤/브랜드택/사이즈택/소재택/줄자/하자)</label>
+    <input type="file" id="photos" name="photos" accept="image/*" multiple
+           capture="environment" style="font-size:16px; padding:8px 0">
+    <div class="hint">최대 {{ max_photos }}장, 장당 {{ max_mb }}MB. 자동으로 리사이즈됩니다.</div>
+  </div>
+  <div class="card">
+    <label class="f" for="note">메모 (선택)</label>
+    <input type="text" id="note" name="note" placeholder="예: 박스 A-3, 내일 촬영분">
+  </div>
+  <button class="btn primary block" type="submit">업로드</button>
+</form>
+<div class="hint">업로드 후 상태는 "분석 대기"가 됩니다. 철수가 초안을 작성하면 "초안 검토"에서 확인하세요.</div>
+{% endblock %}

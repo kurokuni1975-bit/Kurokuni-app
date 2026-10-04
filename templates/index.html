@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}KUROKUNI 리스팅 대시보드{% endblock %}
+{% block body %}
+<div class="stat">
+  <span class="pill">분석 대기 {{ counts.get('pending',0) }}</span>
+  <span class="pill">초안 완료 {{ counts.get('draft_ready',0) }}</span>
+  <span class="pill">발행됨 {{ counts.get('published',0) }}</span>
+  <span class="pill">실패 {{ counts.get('failed',0) }}</span>
+</div>
+<div class="card">
+  <div class="meta">eBay 환경: <b>{{ ebay_env }}</b>
+    · 토큰: {% if tok.has_tokens %}✅{% else %}❌{% endif %}
+    · 이미지 공개 URL: {% if image_base_set %}✅{% else %}❌ 미설정{% endif %}</div>
+  {% if not image_base_set %}
+  <div class="hint">⚠️ IMAGE_BASE_URL이 없어 발행이 차단됩니다. README의 배포 섹션을 참고하세요.</div>
+  {% endif %}
+</div>
+{% for it in items %}
+<div class="card">
+  <div class="list-item">
+    {% if it.photos %}<img class="thumb" src="/uploads/{{ it.item_id }}/{{ it.photos[0] }}">{% endif %}
+    <div style="flex:1">
+      <div><b>{{ it.item_id }}</b> <span class="badge {{ it.status }}">{{ labels.get(it.status, it.status) }}</span></div>
+      <div class="meta">{{ it.photos|length }}장 사진
+        {% if it.listing_id %}· 리스팅 {{ it.listing_id }}{% endif %}
+        {% if it.depop_status %}· Depop: {{ it.depop_status }}{% endif %}
+        {% if it.note %}· {{ it.note }}{% endif %}</div>
+      {% if it.error %}<div class="err" style="margin:6px 0">{{ it.error }}</div>{% endif %}
+    </div>
+  </div>
+  <div style="display:flex; gap:8px; margin-top:8px">
+    <a class="btn" href="/item/{{ it.item_id }}" style="flex:1">보기</a>
+    {% if it.status in ('pending','draft_ready','failed') %}
+    <a class="btn" href="/review/{{ it.item_id }}" style="flex:1">초안 검토</a>
+    {% endif %}
+  </div>
+</div>
+{% else %}
+<div class="card"><div class="meta">아직 상품이 없습니다. "+ 새 상품"으로 사진을 올려보세요.</div></div>
+{% endfor %}
+{% endblock %}

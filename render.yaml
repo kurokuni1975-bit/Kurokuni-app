@@ -1,0 +1,23 @@
+# Render.com 배포 설정 (무료 플랜)
+# https://dashboard.render.com 에서 New > Web Service > 이 저장소 연결 후 사용
+# 또는 아래 render.yaml을 저장소 루트에 두고 Blueprint로 배포
+
+services:
+  - type: web
+    name: kurokuni-ebay-app
+    runtime: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120"
+    envVars:
+      - key: APP_EBAY_ENV
+        value: production
+      - key: PYTHON_VERSION
+        value: 3.11.0
+    # 아래 값들은 Render 대시보드에서 직접 설정 (민감값이므로 파일에 기록 금지):
+    # - EBAY_API_DIR (기본값: ~/workspace/ebay-api — Render에서는 /opt/render/project/src/ebay-api 로 조정 필요)
+    # - IMAGE_BASE_URL (배포 후 발급되는 https://kurokuni-ebay-app.onrender.com)
+    #
+    # 주의: eBay API 키(.env.production)와 토큰(.tokens.production.json)은
+    # Render의 Environment > Secret Files 또는 Env Vars로 별도 등록해야 함.
+    # Secret Files 경로: /etc/secrets/.env.production 등
