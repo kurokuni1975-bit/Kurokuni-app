@@ -144,6 +144,13 @@ def build_listing_input(item: dict, draft: dict,
             paras = [p.strip() for p in description.split("\n") if p.strip()]
         description = "".join(f"<p>{p}</p>" for p in paras)
 
+    # 필수 item specifics 기본값 (eBay가 요구하는 항목)
+    aspects = dict(draft.get("aspects") or {})
+    # T-Shirts 카테고리 필수: Size Type, Department
+    if (draft.get("category") or "tshirt") == "tshirt":
+        aspects.setdefault("Size Type", "Regular")
+        aspects.setdefault("Department", "Men")
+
     return {
         "sku": item["sku"],
         "title": (draft.get("title") or "").strip(),
@@ -156,7 +163,7 @@ def build_listing_input(item: dict, draft: dict,
         "best_offer": bool(draft.get("suggested_best_offer", True)),
         "min_offer_price": draft.get("min_offer_price"),
         "box_number": draft.get("box_number") or "",
-        "aspects": draft.get("aspects") or {},
+        "aspects": aspects,
     }
 
 
