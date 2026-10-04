@@ -76,7 +76,7 @@ def _ebay_image_urls(item: dict, draft: dict | None) -> tuple[list[str], str | N
         return [], ("이미지 공개 URL(IMAGE_BASE_URL)이 설정되지 않았습니다. "
                     "서버에 공개 https 주소를 연결한 뒤 환경변수로 지정하세요.")
     base = config.IMAGE_BASE_URL
-    return [f"{base}/{item['item_id']}/{f}" for f in item["photos"]], None
+    return [f"{base}/uploads/{item['item_id']}/{f}" for f in item["photos"]], None
 
 
 def _draft_form_defaults() -> dict:
