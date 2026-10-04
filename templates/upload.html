@@ -3,18 +3,92 @@
 {% block body %}
 <h2>새 상품 사진 올리기</h2>
 {% if error %}<div class="err">{{ error }}</div>{% endif %}
-<form method="post" enctype="multipart/form-data">
+<form method="post" enctype="multipart/form-data" id="uploadForm">
   <div class="card">
     <label class="f" for="photos">사진 선택 (앞/뒤/브랜드택/사이즈택/소재택/줄자/하자)</label>
     <input type="file" id="photos" name="photos" accept="image/*" multiple
            style="font-size:16px; padding:8px 0">
-    <div class="hint">최대 {{ max_photos }}장, 장당 {{ max_mb }}MB. 자동으로 리사이즈됩니다.</div>
+    <div class="hint">최대 {{ max_photos }}장. 폰에서 자동으로 줄여서 올립니다.</div>
+    <div id="progress" class="hint" style="display:none; color:#1a73e8; font-weight:bold;"></div>
   </div>
   <div class="card">
     <label class="f" for="note">메모 (선택)</label>
     <input type="text" id="note" name="note" placeholder="예: 박스 A-3, 내일 촬영분">
   </div>
-  <button class="btn primary block" type="submit">업로드</button>
+  <button class="btn primary block" type="submit" id="submitBtn">업로드</button>
 </form>
 <div class="hint">업로드 후 상태는 "분석 대기"가 됩니다. 철수가 초안을 작성하면 "초안 검토"에서 확인하세요.</div>
+
+<script>
+(function() {
+  var form = document.getElementById('uploadForm');
+  var input = document.getElementById('photos');
+  var btn = document.getElementById('submitBtn');
+  var progress = document.getElementById('progress');
+  var MAX_SIDE = 1600;
+
+  function resizeFile(file) {
+    return new Promise(function(resolve, reject) {
+      var img = new Image();
+      var url = URL.createObjectURL(file);
+      img.onload = function() {
+        URL.revokeObjectURL(url);
+        var w = img.width, h = img.height;
+        var scale = Math.min(1, MAX_SIDE / Math.max(w, h));
+        var cw = Math.round(w * scale), ch = Math.round(h * scale);
+        var canvas = document.createElement('canvas');
+        canvas.width = cw; canvas.height = ch;
+        canvas.getContext('2d').drawImage(img, 0, 0, cw, ch);
+        canvas.toBlob(function(blob) {
+          if (blob) resolve(new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', {type: 'image/jpeg'}));
+          else reject(new Error('resize failed'));
+        }, 'image/jpeg', 0.85);
+      };
+      img.onerror = function() { URL.revokeObjectURL(url); reject(new Error('load failed')); };
+      img.src = url;
+    });
+  }
+
+  form.addEventListener('submit', function(e) {
+    var files = input.files;
+    if (!files || files.length === 0) return; // 서버에서 에러 표시
+    e.preventDefault();
+    btn.disabled = true;
+    btn.textContent = '준비 중...';
+    progress.style.display = 'block';
+
+    var done = 0, resized = [];
+    var total = files.length;
+
+    function next(i) {
+      if (i >= total) { sendAll(); return; }
+      progress.textContent = '사진 줄이는 중... (' + (i + 1) + '/' + total + ')';
+      resizeFile(files[i]).then(function(f) {
+        resized.push(f); next(i + 1);
+      }).catch(function() {
+        resized.push(files[i]); next(i + 1); // 실패하면 원본
+      });
+    }
+
+    function sendAll() {
+      progress.textContent = '업로드 중... 잠시만요.';
+      btn.textContent = '업로드 중...';
+      var fd = new FormData();
+      resized.forEach(function(f) { fd.append('photos', f, f.name); });
+      fd.append('note', document.getElementById('note').value);
+      fetch(form.action || window.location.href, {method: 'POST', body: fd})
+        .then(function(r) {
+          if (r.redirected) { window.location.href = r.url; return; }
+          return r.text().then(function(html) { document.open(); document.write(html); document.close(); });
+        })
+        .catch(function(err) {
+          progress.textContent = '업로드 실패: ' + err.message;
+          btn.disabled = false;
+          btn.textContent = '업로드';
+        });
+    }
+    next(0);
+  });
+})();
+</script>
 {% endblock %}
