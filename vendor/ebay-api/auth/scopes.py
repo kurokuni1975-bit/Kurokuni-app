@@ -32,9 +32,10 @@ DEFAULT_SCOPES = [
     API_SCOPE,
     SELL_INVENTORY,
     SELL_FULFILLMENT,
-    SELL_NEGOTIATION,
     SELL_ACCOUNT,
 ]
+# 참고: SELL_NEGOTIATION은 Production 키셋에 미부여 (eBay 셀프서비스 추가 불가).
+# Best Offer 감시는 기존 브라우저 방식으로 유지.
 
 # 모듈별 필요 scope 정리표 (README/docs용)
 SCOPES_BY_MODULE = {
