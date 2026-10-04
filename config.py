@@ -42,6 +42,26 @@ FLASK_PORT = int(os.environ.get("APP_PORT", "5000"))
 FLASK_DEBUG = os.environ.get("APP_DEBUG", "0") == "1"
 
 
+def ensure_secret_files(ebay_env: str) -> None:
+    """Render 등 파일 영속성이 없는 환경 지원.
+
+    EBAY_ENV_CONTENT / EBAY_TOKENS_CONTENT 환경변수에 파일 내용이 있으면
+    기대 경로에 기록한다 (재시작 시 토큰 원본 복원용). 값은 로그에 남기지 않는다.
+    """
+    pairs = (
+        ("EBAY_ENV_CONTENT", env_file_for(ebay_env)),
+        ("EBAY_TOKENS_CONTENT", token_file_for(ebay_env)),
+    )
+    for var, path in pairs:
+        content = os.environ.get(var)
+        if content and not path.exists():
+            path.write_text(content, encoding="utf-8")
+            try:
+                os.chmod(path, 0o600)
+            except OSError:
+                pass
+
+
 def env_file_for(ebay_env: str) -> Path:
     """환경에 맞는 .env 파일 경로."""
     if ebay_env == "production":
@@ -58,6 +78,7 @@ def token_file_for(ebay_env: str) -> Path:
 
 def load_ebay_env(ebay_env: str) -> None:
     """eBay .env 파일에서 EBAY_ 변수만 os.environ에 로드. 값은 반환하지 않음."""
+    ensure_secret_files(ebay_env)
     path = env_file_for(ebay_env)
     if not path.exists():
         raise RuntimeError(f"eBay 설정 파일 없음: {path}")
